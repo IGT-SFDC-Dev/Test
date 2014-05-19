@@ -1,0 +1,16 @@
+<apex:page standardController="BMCServiceDesk__Change_Request__c" extensions="BMCServiceDesk.StdChangeRequestExtensionController" id="thePage" action="{!doAction}" showHeader="false" standardStylesheets="false">
+<head>
+	<link rel="stylesheet" type="text/css" href="{!$Resource.SDEFStyles}/NavigatorStyleSheet.css"/>
+</head>
+    <apex:form target="_parent">
+        <c:StdLayoutStageProgression ObjectName="Change_Request__c" status="{!current_status}" ShowServiceTargetsIcon="true" ServiceTargetStatus="{!ServiceTargetStatus}" />
+        <apex:actionFunction name="refreshChangeRequest" action="{!refreshChangeRequest}" />
+   </apex:form>
+   <script>
+    	var errorMsg = '{!JSENCODE(messageString)}';
+    	if (errorMsg.length > 0) {
+	    	alert(errorMsg);
+	    	refreshChangeRequest();
+    	}
+    </script>
+</apex:page>

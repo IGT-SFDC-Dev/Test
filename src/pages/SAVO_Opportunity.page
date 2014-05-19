@@ -1,0 +1,44 @@
+<apex:page standardController="Opportunity" extensions="SAVOExtension">
+<savo_classic:Header ></savo_classic:Header>
+<table>
+    <tr>
+        <!-- 
+        <td valign="top">
+            <apex:form >
+                <apex:pageBlockSection id="ProductSelectSection" showHeader="false">
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Product" for="lineItems" />
+                        <apex:selectList value="{!selectedProductId}" multiselect="false" size="1" id="lineItems">
+                            <apex:selectOptions value="{!lineItemOptions}" />
+                            <apex:actionSupport event="onchange" rerender="savoProductContent" />
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+            		<apex:outputText value="" />
+                    <apex:outputPanel id="savoProductContent">
+                        <savo_classic:List title="Product Info" tags="{!ProductName}"></savo_classic:List>
+                    </apex:outputPanel>
+                </apex:pageBlockSection>
+            </apex:form>
+        </td>
+         -->
+        
+        <apex:outputPanel rendered="{!listSize>0}">
+        <td valign="top">
+        	<div style="height:236px;overflow-y:auto;overflow-x:hidden"><savo_classic:List title="Product Info" tags="{!ProductName}"></savo_classic:List></div>
+        </td>
+        </apex:outputPanel>
+        
+        <apex:outputPanel rendered="{!displayStageNameWidget}">
+        <td valign="top">
+        	<div style="height:236px;overflow-y:auto;overflow-x:hidden"><savo_classic:List title="{!StageName} Info" tags="{!StageName}"></savo_classic:List></div>
+        </td>
+        </apex:outputPanel>
+         
+        <!-- <td valign="top"><savo_classic:Html title="Recommended Sales Stage Content"></savo_classic:Html></td>  -->
+    
+        <td valign="top"><div style="height:236px;overflow-y:auto;overflow-x:hidden"><savo_classic:Search ></savo_classic:Search></div></td>
+    
+        <!-- <td valign="top"><savo_classic:Post postId="30568848" title="A Save POST Title"></savo_classic:Post></td> -->
+    </tr>
+</table>
+</apex:page>

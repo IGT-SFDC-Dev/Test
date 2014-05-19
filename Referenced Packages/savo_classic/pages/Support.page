@@ -1,0 +1,104 @@
+<apex:page controller="savo_classic.SupportController" >
+    <script src="/soap/ajax/15.0/connection.js" type="text/javascript"></script>
+    <script src="/soap/ajax/15.0/apex.js" type="text/javascript"></script>
+    <apex:includeScript value="{!$Resource.savo_classic__jquery182}" />
+    <apex:includeScript value="{!$Resource.savo_classic__knockoutjs}" />    
+    <apex:stylesheet value="{!$Resource.savo_classic__SfdcStyles}" />
+    <apex:includeScript value="{!$Resource.savo_classic__SfdcScriptsMin}" />
+
+    <div>
+       <h1>This is the Admin Support page for SAVO Sales Opportunity Pro.  It's important to only enable access for System Administrators.</h1>
+       <br/><br/>                     
+    </div>
+       
+    <div class="panel"> 
+       <h1 id="myTenantId">  </h1>
+       <br/>    
+       <h1 class="label">Search:</h1>
+       <input id ="userEMail" style="width:200px;"/>
+       <button onclick="findUserByEMail()">Find</button>
+    </div>
+    
+    <div class="panel" style="width:600px;border: 1px solid #D3D3D3; ">
+      <h1 style="display: block;">If a user's email changes or is having issues connecting to the integration, you may reset their access below. Input the user's email into the Search textbox and click Find; if the user exists a long character/number value is displayed - this is the user's authentication token (SAVO Support will ask for this if you run into further issues).  Click the "Reset" button then have the user navigate to a Salesforce page containing Sales Opportunity Pro to update their access.
+      </h1> 
+    </div>
+    
+    <div id="panelUserToken" style="width:100%;display:none" class="panel"> 
+       <h1 id="accessToken" style="display:none;"></h1>
+       <br/>
+       <button id="resetAccessToken" onclick="resetAccessToken()" style="display:none;">Reset</button>
+    </div>
+    
+    <script type="text/javascript">
+        
+        $(function() {
+            sforce.connection.sessionId = "{!$Api.Session_ID}";
+            var userId ="";             
+            var tenantId= sforce.apex.execute(Savo.Classic.GetPackageName() + "SupportController", "GetTenantId", {});
+            var tenantLabel ="";
+            
+            if(tenantId!=null && tenantId.length > 0 && tenantId[0]!=null && tenantId[0].length > 0)
+            {
+                tenantId[0].toString()
+                tenantLabel = "My SAVO Tenant Id : " + tenantId;
+            }
+            $("#myTenantId").html(tenantLabel);             
+        });
+        
+        
+        
+        function findUserByEMail()
+        {
+           var userEMail = document.getElementById("userEMail").value;          
+           var users= sforce.apex.execute(Savo.Classic.GetPackageName() + "SupportController", "GetUsersByEMail", { userEmail: userEMail });
+           
+           userId="";
+           
+           $("#panelUserToken").show();
+           $("#accessToken").html("")
+           $("#accessToken").show();
+                              
+           if(users.length < 1)
+           {
+              $("#accessToken").html("User not found");
+              $("#resetAccessToken").hide();
+           }   
+           else if(users.length > 1)
+           {
+              $("#accessToken").html("More than one user found for this EMail");
+              $("#resetAccessToken").hide();
+           }           
+           else
+              userId = users[0];
+               
+           $("#accessToken").show();
+           
+           if(userId != "")
+           {
+              var authToken = sforce.apex.execute(Savo.Classic.GetPackageName() +"SupportController", "GetAccessTokenByUserId", { userId: userId.Id});
+              
+              if(authToken.length > 0)
+                 authToken = "User\'s Access Token found: "+ authToken;
+              else
+                 authToken = "User\'s Access Token not found";
+                 
+              $("#accessToken").html(authToken );
+              $("#resetAccessToken").show();              
+           }
+        }
+        
+        function resetAccessToken()
+        { 
+           if(userId != "")
+              var accessToken= sforce.apex.execute(Savo.Classic.GetPackageName() +"SupportController", "DeleteAccessTokenByUserId", { userId: userId.Id});
+                                   
+           var messageLabel = document.getElementById("accessToken");
+           messageLabel.Text ="";
+
+           $("#resetAccessToken").hide();
+           $("#accessToken").hide();
+           $("#panelUserToken").hide();
+        }
+   </script>    
+</apex:page>

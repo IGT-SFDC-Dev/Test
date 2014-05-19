@@ -1,0 +1,6 @@
+<apex:component id="logoComponent" controller="BMCServiceDesk.SSThemeImagesComponentController">
+    <apex:outputLink value="{!companyURL}" title="{!URLTipText}" styleClass="clsSSHeader" id="bmcLink">
+        <apex:image value="{!URLFOR($Resource.BMCServiceDesk__Themes,theme.BMCServiceDesk__Resource_File_Name__c+'/SDEFimages/logo_bmc.gif')}" rendered="{!NOT (customLogoImageVisible)}"/>
+        <apex:image url="/servlet/servlet.FileDownload?file={!logoImageId}" rendered="{!customLogoImageVisible}" width="135" height="28"/>
+    </apex:outputLink>
+</apex:component>

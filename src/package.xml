@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>IGT_AccountContactRoleExtension</members>
+        <members>IGT_CreateAndLinkProblemController</members>
+        <members>IGT_SyncCaseIncidentTH</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>IGTCreateAndLinkProblemPage</members>
+        <members>IGT_AccountContactRoleList</members>
+        <name>ApexPage</name>
+    </types>
+    <version>29.0</version>
+</Package>

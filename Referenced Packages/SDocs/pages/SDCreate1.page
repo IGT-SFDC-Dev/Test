@@ -1,0 +1,90 @@
+<apex:page controller="SDOC.SDCreateController" 
+tabStyle="SDOC__SDTemplate__c" 
+action="{!initStep1}">
+<apex:sectionHeader title="Create S-Docs" subtitle="Choose Documents"/>
+<apex:form >
+<apex:pageMessages />
+        <span class="style6">&lt;&lt;</span>
+        <apex:commandLink action="{!returnToObj}" value=" Back"/>
+<br></br><br></br>
+                <apex:panelGroup >
+                     <apex:outputLabel for="searchText2">Search in &nbsp;</apex:outputLabel>
+                     <apex:selectList size="1" value="{!docCategory}">
+                        <apex:selectOptions value="{!docCategories}"/>
+                        <apex:actionSupport event="onchange"  action="{!initStep1}" rerender="panel3g" status="panel3gStatus"/>
+                    </apex:selectList>
+                    <apex:outputLabel for="searchText2"> for : &nbsp;</apex:outputLabel>
+                        <apex:inputText id="searchText2" value="{!searchText2}"/>
+                        <apex:commandButton value="Search" action="{!initStep1}" rerender="panel3g" status="panel3gStatus">
+                            <apex:param name="txtValue" value="{!searchText2}"/>
+                        </apex:commandButton>
+                    <apex:actionStatus id="panel3gStatus">
+                        <apex:facet name="start">
+                            <img src="{!URLFOR($Resource.SDoc,'spinner.gif')}" /> searching...
+                        </apex:facet>
+                    </apex:actionStatus>
+                </apex:panelGroup>
+<br></br><br></br>
+<apex:pageBlock title="Search Results">
+<table width="100%">
+<tr valign="top">
+<td> 
+    <apex:pageBlockSection columns="1" collapsible="false">
+            <apex:pageBlockSectionItem >
+                <apex:panelGroup id="panel3g">
+                    <apex:outputText >&nbsp;&nbsp;&nbsp;&nbsp;
+                         <img src="{!URLFOR($Resource.SDoc,'checkbox_arrow.png')}" />
+                        <apex:commandButton action="{!step2}" value="{!btnTxtStep2}" styleClass="btn"/>
+                    </apex:outputText>
+                    <apex:pageBlockTable value="{!docsList}"  var="c" rendered="{!NOT(ISNULL(docsList))}">
+                        <apex:column width="25px">
+                            <apex:inputCheckbox value="{!c.checked}"/>
+                            <apex:actionsupport event="onclick" action="{!addDoc}" rerender="panel4g" status="panel4Status" />
+                        </apex:column>
+                        <apex:column headerValue="Name"><apex:outputText value="{!c.t.SDOC__Format_Icon__c}" escape="false"/>
+                        &nbsp;&nbsp;<apex:outputText value="{!c.t.Name}"/></apex:column>
+                        <apex:column value="{!c.t.SDOC__Description__c}" headerValue="Description"/>
+                    </apex:pageBlockTable> 
+                    <apex:outputText rendered="{!recordCount>9}">
+                        <b>[More Available - Use Search criteria to limit results]</b>
+                    </apex:outputText>
+                </apex:panelGroup>
+            </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>
+</td><td></td>
+<td>
+    <apex:pageBlockSection title="Selected Documents" columns="1" collapsible="false">
+         <apex:pageBlockSectionItem >
+                <apex:panelGroup id="panel4g">
+                    <apex:pageBlockTable value="{!selectedDocs}" var="ca" columnsWidth="50px, *" cellpadding="0" cellspacing="0">
+                        <apex:column headerValue="Remove">
+                            <apex:actionSupport event="onclick" rerender="panel4g, panel3g" status="panel4Status">
+                                <apex:commandLink value="X" action="{!removeDoc}" styleClass="btn">
+                                    <apex:Param name="tid" value="{!ca.t.ID}" />
+                                </apex:commandLink>
+                            </apex:actionSupport>
+                        </apex:column>
+                        <apex:column value="{!ca.t.Name}" headerValue="Name"/>  
+                    </apex:pageBlockTable>
+                </apex:panelGroup>
+            </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>
+    <apex:actionStatus id="panel4Status">
+        <apex:facet name="start">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <img src="{!URLFOR($Resource.SDoc,'spinner.gif')}" /> updating...
+        </apex:facet>
+    </apex:actionStatus>    
+</td>
+</tr>
+<tr>
+    <td width="65%"></td>
+    <td width="5%"></td>
+    <td width="30%"></td>
+</tr>
+</table>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<apex:commandButton action="{!step2}" value="{!btnTxtStep2}" styleClass="btn"/>
+</apex:pageBlock>
+
+</apex:form>
+</apex:page>

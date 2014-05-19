@@ -1,0 +1,253 @@
+<apex:page controller="SDOC.SDCreateController" 
+tabStyle="SDOC__SDTemplate__c"
+action="{!initStep3}"> 
+<head>
+<apex:styleSheet value="{!URLFOR($Resource.SDOC__SDoc,'skin.css')}" />
+<apex:includeScript value="{!URLFOR($Resource.SDOC__SDoc,'yahoo-dom-event.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.SDOC__SDoc,'container-min.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.SDOC__SDoc,'animation-min.js')}" />
+<apex:form >
+<apex:actionFunction name="attach" action="{!createAttachments}" rerender="out" status="stat1"/>
+
+</apex:form>
+    
+<script>
+    // Create a namespace for our custom functions
+    YAHOO.namespace("force.com");
+    YAHOO.force.com.showMe = function() {
+        document.getElementById("myPanel").style.display = "block";
+        YAHOO.force.com.myDialog.show();
+    }
+    YAHOO.force.com.hideMe = function() {
+        YAHOO.force.com.myDialog.hide();
+    }
+    YAHOO.force.com.showEmail = function() {
+        document.getElementById("emailPanel").style.display = "block";
+        YAHOO.force.com.eDialog.show();
+    }
+    YAHOO.force.com.hideEmail = function() {
+        YAHOO.force.com.eDialog.hide();
+    }
+    // Function called when the DOM is ready to create the dialog,
+    // render the dialog into the document body, add our dialog skin
+    // css to the body tag, and wire up the buttons on our dialog    
+    YAHOO.force.com.init = function() {
+        document.body.className = document.body.className + " yui-skin-sam";
+        
+        YAHOO.force.com.myDialog = new YAHOO.widget.Panel(
+            "myPanel",  // The id of our dialog container
+            { 
+                    width           :   "700px",    // You can play with this until it's right
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   false,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   40,     // Make sure it's on top of everything
+                    
+                    // This line adds the appear/vanish fade effect
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.40
+                                        } 
+            }
+       );
+       YAHOO.force.com.eDialog = new YAHOO.widget.Panel(
+            "emailPanel",  // The id of our dialog container
+            { 
+                    width           :   "700px",    // You can play with this until it's right
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   false,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   40,     // Make sure it's on top of everything
+                    
+                    // This line adds the appear/vanish fade effect
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.40
+                                        } 
+            }
+            
+         );
+        
+        // Render the dialog to the document.body level of the DOM
+        YAHOO.force.com.myDialog.render(document.body);
+        YAHOO.force.com.eDialog.render(document.body);
+    }
+    
+    // Add the init method to the window.load event
+    YAHOO.util.Event.addListener(window, "load", YAHOO.force.com.init);
+	window.onload = function() { 
+        	attach();
+		}
+    var newwindow;
+    function popURL(url)
+        {
+          newwindow=window.open(url,"SDocs","width=1100,height=700,top=0,resizable,scrollbars,screenX=60,top=100,screenY=100");
+        	try{
+				newwindow.document.location.href = url;
+          	}catch (exc){
+          		newwindow.close(); 
+          		newwindow=window.open(url,"SDocs","width=1100,height=700,top=0,resizable,scrollbars,screenX=60,top=100,screenY=100");
+    			newwindow.document.location.href = url; 
+         	}
+         	if (window.focus){newwindow.focus()}
+        }
+</script>
+
+</head>
+<!-- This is the content of the modal dialog -->
+<div id="myPanel" style="display: none" >
+  <div class="hd">
+    <apex:outputText value="Add Comment to Document" />
+  </div> 
+  <div class="bd">
+      <apex:form >
+        <apex:pageBlock >
+          <apex:pageBlockSection columns="1">
+           <apex:inputText size="75" maxlength="255" id="comment" value="{!CommentToAdd}" />
+          </apex:pageBlockSection>
+        </apex:pageBlock>
+        <div style="text-align: right;" >
+            <apex:actionStatus id="saveStatus">
+                        <apex:facet name="start">
+                            <img src="{!URLFOR($Resource.SDoc,'spinner.gif')}" />
+                        </apex:facet>
+            </apex:actionStatus>
+            <apex:commandButton value="Save" action="{!addComment}"
+                    oncomplete="YAHOO.force.com.hideMe();" reRender="dg" status="saveStatus">
+            </apex:commandButton>
+            <apex:commandButton value="Cancel" immediate="true" 
+              oncomplete="YAHOO.force.com.hideMe();"/>
+        </div>
+      </apex:form>
+  </div>
+  <div class="ft" style="font-size: 10px;">
+    <apex:outputPanel layout="block">
+      You can add a note/comment that will be associated with the document you have just generated.<br></br> 
+      The comment will be visible to all users when viewing this document within a list,<br></br>
+      but does not affect the document content.
+    </apex:outputPanel>
+  </div>
+</div>
+
+<div id="emailPanel" style="display: none" >
+  <div class="hd">
+    <apex:outputText value="Email Document(s)" />
+  </div> 
+  <div class="bd">
+  <div class="ft" style="font-size: 10px;">
+    <apex:outputPanel layout="block">
+      You can use this page to email the documents you have just created. Use semi-colons to separate email addresses.
+      If any of the documents you selected to email are of HTML type, the HTML body of this email will automatically be replaced with the content of that document.
+    </apex:outputPanel>
+  </div>
+      <apex:form >
+        <apex:pageBlock >
+           <apex:pageBlockSection columns="2">
+
+            <apex:outputLabel value="Email Contact" for="eContact"/>                
+            <apex:selectList value="{!targetObjectId}" size="1" id="eContact">
+                <apex:selectOptions value="{!contactItems}"/>
+                <apex:actionSupport event="onchange" action="{!showEmail}" reRender="emailTo" status="emailstat"/>
+            </apex:selectList>
+           <apex:outputLabel value="To:" for="emailTo"/>
+           <apex:outputText id="emailTo" value="{!emailTo}">
+                <apex:actionStatus id="emailstat">
+                    <apex:facet name="start">
+                        <img src="{!URLFOR($Resource.SDoc,'spinner.gif')}" />&nbsp;please wait...
+                    </apex:facet>
+                </apex:actionStatus>
+            </apex:outputText>
+           <apex:outputLabel value="Additional To:" for="emailAto"/>
+           <apex:inputText size="75" maxlength="255" id="emailAto" value="{!emailAto}" />
+           <apex:outputLabel value="CC:" for="emailcc"/>
+           <apex:inputText size="75" maxlength="255" id="emailcc" value="{!emailcc}" />
+           <apex:outputLabel value="BCC:" for="emailbcc"/>
+           <apex:inputText size="75" maxlength="255" id="emailbcc" value="{!emailbcc}" />
+           <apex:outputLabel value="Subject:" for="emailSubj"/>
+           <apex:inputText size="75" maxlength="255" id="emailSubj" value="{!emailSubj}" />
+           <apex:outputLabel value="Body:" for="emailBody"/>
+           <apex:inputTextarea rows="10" cols="75" id="emailBoody" value="{!emailBody}" />
+           <apex:outputLabel value="Attachments:" for="emailAtt"/>
+           <apex:outputText id="emailAtt" value="{!emailAtt}"></apex:outputText>
+          </apex:pageBlockSection>
+        </apex:pageBlock>
+        <div style="text-align: right;" >
+                <apex:actionStatus id="stat">
+                    <apex:facet name="start">
+                        Creating attachments, please wait...
+                        <img src="{!URLFOR($Resource.SDoc,'spinner_large.gif')}" />
+                    </apex:facet>
+                </apex:actionStatus>
+                        <apex:commandButton value="Send" action="{!email}" status="stat"
+                            oncomplete="YAHOO.force.com.hideEmail();" reRender="dg">
+                        </apex:commandButton>
+                        <apex:commandButton value="Cancel" immediate="true" 
+                            oncomplete="YAHOO.force.com.hideEmail();"/>
+        </div>
+      </apex:form>
+  </div>
+
+</div>
+
+
+<apex:sectionHeader title="Create S-Docs" subtitle="View Document(s)"/>
+<apex:form >
+<apex:pageMessages />
+        <span class="style6">&lt;&lt;</span>
+        <apex:commandLink action="{!returnToObj}" value="Back"/> 
+<br></br>
+<br></br>
+<apex:pageBlock title="View Document(s)">
+    <apex:outputPanel id="out">
+                <apex:actionStatus id="stat1">
+                </apex:actionStatus>
+    </apex:outputPanel>
+    <apex:pageBlockSection title="The following S-Docs have been created" columns="1" id="dg" collapsible="false">
+                            <apex:outputText >&nbsp;&nbsp;&nbsp;&nbsp;
+                                <img src="{!URLFOR($Resource.SDoc,'checkbox_arrow.png')}" />
+                                <apex:commandLink styleClass="btn" value="Email" oncomplete="YAHOO.force.com.showEmail();"                      
+                                    style="padding:2px 5px 2px 5px; text-decoration:none; color:black;"/> 
+                            </apex:outputText>
+         <apex:pageBlockSectionItem >
+                    <apex:pageBlockTable value="{!SDDocsGenerated}" var="ag">
+<!-- using javascript for more control, (pop up vs open in new tab, and removes nav bars)--> 
+                        <apex:column width="20px">
+                            <apex:inputCheckbox value="{!ag.checked}"/>
+                            <apex:actionsupport event="onclick" action="{!addDoc}" rerender="panel4g" status="Panel4Status" />
+                        </apex:column>
+                        <apex:column width="40px" headerValue="View" onmouseover="this.style.cursor='pointer'"
+                        onclick="popURL('/apex/SDTemplate{!ag.d.SDTemplate__r.SDOC__Template_Format__c}?Id={!ag.d.Id}')">
+                        <apex:outputText value="{!ag.d.SDTemplate__r.SDOC__Format_Icon__c}" escape="false"/>
+                        </apex:column>
+                        <apex:column headerValue="Document Number">
+                            <apex:commandLink value="{!ag.d.Name}"
+                            onclick="popURL('/apex/SDTemplate{!ag.d.SDTemplate__r.SDOC__Template_Format__c}?Id={!ag.d.Id}')"/>
+                        </apex:column>
+                        <apex:column value="{!ag.d.SDOC__Document_Name__c}" headerValue="Document Name"/>                     
+                        <apex:column headerValue="Comments" rendered="{!ISNULL(ag.d.SDOC__Comment__c)}">
+                            <apex:commandLink value="Add" oncomplete="YAHOO.force.com.showMe();"
+                                style="padding:2px 5px 2px 5px; text-decoration:none; color:black;"
+                                action="{!setCID}" styleClass="btn"> 
+                                    <apex:param name="agID" value="{!ag.d.ID}"/>
+                            </apex:commandLink>
+                        </apex:column>
+                        <apex:column headerValue="Comments" rendered="{!NOT(ISNULL(ag.d.SDOC__Comment__c))}">
+                            <apex:commandLink value="{!ag.d.SDOC__Comment__c}" oncomplete="YAHOO.force.com.showMe();"
+                                action="{!setCID}"> 
+                                    <apex:param name="agID" value="{!ag.d.ID}"/>
+                            </apex:commandLink>
+                        </apex:column>
+                        <apex:column value="{!ag.d.SDOC__Status__c}" headerValue="Status"/> 
+                        <apex:column value="{!ag.d.CreatedBy.Name}" headerValue="Created By"/> 
+                        <apex:column value="{!ag.d.CreatedDate}" headerValue="Created On"/> 
+                    </apex:pageBlockTable>
+            </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>
+
+</apex:pageBlock>
+</apex:form>
+</apex:page>

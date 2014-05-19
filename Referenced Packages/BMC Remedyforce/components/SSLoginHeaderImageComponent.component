@@ -1,0 +1,6 @@
+<apex:component id="loginHeaderComponent" controller="BMCServiceDesk.SSThemeImagesComponentController">
+	<apex:outputLink value="{!companyURL}" title="{!URLTipText}" id="bmcLink">
+		<apex:image value="{!URLFOR($Resource.BMCServiceDesk__Themes,theme.BMCServiceDesk__Resource_File_Name__c+'/SDEFimages/login_title_RemedyForce.png')}" rendered="{!NOT (customLoginHeaderImageVisible)}"/>
+        <apex:image url="/servlet/servlet.FileDownload?file={!loginHeaderId}" rendered="{!customLoginHeaderImageVisible}" width="148" height="19"/>
+	</apex:outputLink>
+</apex:component>

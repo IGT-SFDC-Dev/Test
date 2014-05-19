@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>S4G Automatic Currency Updater</fullName>
+    <apiAccessLevel>Unrestricted</apiAccessLevel>
+    <description>First 100% automatic currency updater for salesforce.com</description>
+    <namespacePrefix>s4g_currencies</namespacePrefix>
+    <types>
+        <members>CurrencyUpdater</members>
+        <members>S4Ghelp</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>S4G_Help</members>
+        <name>ApexPage</name>
+    </types>
+    <types>
+        <members>update_batch_script</members>
+        <name>ApexTrigger</name>
+    </types>
+    <types>
+        <members>S4G_Currency_Updater</members>
+        <name>CustomApplication</name>
+    </types>
+    <types>
+        <members>S4G_Config__c.Password__c</members>
+        <members>S4G_Config__c.Token__c</members>
+        <members>S4G_Config__c.Username__c</members>
+        <members>S4G_settings__c.Password__c</members>
+        <members>S4G_settings__c.Token__c</members>
+        <members>S4G_settings__c.Username__c</members>
+        <members>User.EndPoint__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Batch_Script__c</members>
+        <members>S4G_Config__c</members>
+        <members>S4G_settings__c</members>
+        <name>CustomObject</name>
+    </types>
+    <types>
+        <members>S4G_Help</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
+        <members>Batch_Script__c-Formato de Batch Script</members>
+        <members>S4G_Config__c-S4G Config Layout</members>
+        <name>Layout</name>
+    </types>
+    <types>
+        <members>CustomSettings</members>
+        <members>FU</members>
+        <members>Monitor</members>
+        <members>S4G</members>
+        <members>WFdet</members>
+        <members>WFedit</members>
+        <name>StaticResource</name>
+    </types>
+    <types>
+        <members>Batch_Script__c.Update_Batch_Script_name</members>
+        <name>WorkflowFieldUpdate</name>
+    </types>
+    <version>29.0</version>
+</Package>

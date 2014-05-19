@@ -1,0 +1,7 @@
+<apex:component id="backgroundComponent" controller="BMCServiceDesk.SSThemeImagesComponentController">
+	<apex:outputLink value="{!companyURL}" title="{!URLTipText}"  id="bmcLink">
+						
+		<apex:image value="{!URLFOR($Resource.BMCServiceDesk__Themes,theme.BMCServiceDesk__Resource_File_Name__c+'/SDEFimages/login_background.gif')}" rendered="{!NOT (customBackgroundImageVisible)}"/>
+        <apex:image url="/servlet/servlet.FileDownload?file={!backGroundImageId}" rendered="{!customBackgroundImageVisible}" height="193" width="483"/>
+	</apex:outputLink>
+</apex:component>

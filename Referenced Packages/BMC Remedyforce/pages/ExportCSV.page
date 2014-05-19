@@ -1,0 +1,7 @@
+<apex:page controller="BMCServiceDesk.ReleaseManifestController" cache="true" contentType="{!csvContentType}" showHeader="false" readOnly="true">{!bom} 
+<apex:outputText value="{!releaseName}: {!releaseTitle}" />
+"{!JSENCODE($Label.bmcservicedesk__ReleaseItem)}","{!JSENCODE($Label.bmcservicedesk__ItemId)}","{!JSENCODE($Label.bmcservicedesk__Description)}","{!JSENCODE($Label.bmcservicedesk__Status)}","{!JSENCODE($Label.bmcservicedesk__DueDateHeader)}","{!JSENCODE($Label.bmcservicedesk__PriorityHeader)}","{!JSENCODE($Label.bmcservicedesk__AssignedTo)}","{!JSENCODE($Label.bmcservicedesk__ReleaseStatus)}","{!JSENCODE($Label.bmcservicedesk__Order)}"
+<apex:repeat value="{!listTobeExported}" var="item">
+{!item.releaseElementType},{!item.releaseElement},{!item.description},{!item.status},{!item.dueDate},{!item.priority},{!item.assignedTo},{!item.manifest.FKStatus__r.Name},{!item.manifest.BMCServiceDesk__Order__c}
+</apex:repeat>
+</apex:page>

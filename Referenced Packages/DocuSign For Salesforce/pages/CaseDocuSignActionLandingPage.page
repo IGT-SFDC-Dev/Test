@@ -1,0 +1,27 @@
+<apex:page standardController="Case">
+    <!--  Replace with JQuery in resources -->
+    <apex:includeScript value="https://code.jquery.com/jquery-1.9.1.min.js"/>
+    <body>
+        <div id="DocuSign_CaseContent">
+        </div>
+    </body>
+    <script>
+        $(document).ready(function() {
+            var salesforce1 = false;
+            if ( (typeof sforce != 'undefined') && (sforce != null) ) {
+                salesforce1 = true;
+            } 
+            if (salesforce1 == true)        
+            { 
+                sforce.one.navigateToURL('/apex/dsfs__DocuSign_CreateEnvelope?DSEID=0&SF1=1&SourceID={!$CurrentPage.parameters.id}');
+            }
+            else
+            {
+                $('#DocuSign_CaseContent').append('<input class="btn" type="button" id="DocuSign_CaseAction_Link" value="{!$Label.SendWithDS}"/>');
+                $('#DocuSign_CaseAction_Link').click(function() {
+                    window.top.location.href = "/apex/dsfs__DocuSign_CreateEnvelope?DSEID=0&SourceID={!$CurrentPage.parameters.id}";
+                }); 
+            }
+        });
+    </script>
+</apex:page>

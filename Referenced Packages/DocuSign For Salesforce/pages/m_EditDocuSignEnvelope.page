@@ -1,0 +1,324 @@
+<apex:page Controller="dsfs.m_EditDocuSignEnvelopeController" 
+            tabStyle="dsfs__DocuSign_Status__c" 
+            action="{!checkError}" 
+            showHeader="false" 
+            sidebar="false"
+            language="utf-8"
+            docType="html-5.0" >
+
+
+<html xmlns:ng="http://angularjs.org" ng-app="m-editenvelope">
+    <head>
+        <title>DocuSign</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"></meta>
+
+        <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.m_Resources, 'css/icheck-flat-blue.css')}" />
+        <link rel="stylesheet" type="text/css" href="https://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css" />
+        <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.m_Resources, 'css/m-dfs.css')}" />
+
+        <script type="text/javascript" src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+        <script type="text/javascript" src="https://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="{!URLFOR($Resource.m_Resources, 'js/jquery.ui.touch-punch.min.js')}"></script>
+        <script type="text/javascript" src="{!URLFOR($Resource.m_Resources, 'js/jquery.icheck.min.js')}"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.min.js"></script>
+        <script type="text/javascript" src="{!URLFOR($Resource.m_Resources, 'js/m-dfs.js')}"></script>
+
+        <script type="text/javascript">
+
+            Visualforce.remoting.timeout = 120000;
+
+            angular.module('m-editenvelope', [])
+                .directive('singersListDirective', function() {
+                    return function(scope, element, attrs) {
+                        if (scope.$last) {
+                            init();
+                            setTimeout(
+                                function() {
+                                    //DFS-1214                                    
+                                    var ngScope = $j('#ds_edit').scope();
+                                    if( ngScope && ngScope.signers ) {
+                                        var signers = ngScope.signers;
+                                        for(var i = 0; i < signers.length; i++) {
+                                            if(signers[i].selected && (signers[i].signerType == 'inperson') )
+                                                $j('input:radio[name=signer-type-'+(i+1)+']:nth(1)').iCheck('check');
+                                        }
+                                    }
+                                    if(scope && scope.signer && scope.signer.selected) {
+                                        $j('input:radio[name=signer-type-'+attrs.id+']:nth(0)').iCheck('check');
+                                        $j('#signerOption-'+attrs.id).show();
+                                        $j('#signer-checkbox-'+attrs.id).iCheck('toggle');
+                                    }
+                                }
+                                , 0);
+                            updateDocuSignBtn();
+                            $j('#dsSignersList').listview('refresh');
+                        }
+                    };
+                })
+                .filter('trim', function () {
+                    return function (value) {
+                        if (!value) return '';
+                        var limit = 50;
+                        if(getDeviceType() == 'phone')
+                            limit = 25;
+                        var max = parseInt(limit);
+                        if (!max) return value;
+                        if (value.length <= max) 
+                            return value;
+                        value = value.substr(0, max);
+                        return value + '...';
+                    };
+                })
+                .controller('EditDSEnvCtrl', function ($scope) {
+                    $scope.docs = JSON.parse('{!JSENCODE(docmentsJson)}');
+                    $scope.signers = JSON.parse('{!JSENCODE(signersJson)}');
+
+                    $scope.addSigner = function() {
+                        var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+                        var is_iPhone = navigator.userAgent.match(/\(iPhone\)/i) ? true : false;
+                        if(!emailReg.test($scope.email)) {
+                            if(is_iPhone === true) { 
+                                alert("{!$Label.m_Error_InvalidEmail}");
+                            } else {
+                                $j('.emailError').html("{!$Label.m_Error_InvalidEmail}");
+                                $j('.emailError').show();
+                            }
+                            return;
+                        }
+                        $scope.signers.push(
+                            {   name: $scope.name, 
+                                email: $scope.email, 
+                                routingOrder: $scope.signers.length + 1,
+                                smallPhotoUrl: '',
+                                signerType: 'email',
+                                selected: true
+                            }
+                        );
+                        if(is_iPhone === true) {
+                            $j('#addSignerPopup').popup('close');
+                        } else {
+                            $j('.ds-add-signer-container').hide();
+                            $j('#dsAddSignerBtn').show();
+                            $j('#newSignerName').val('');
+                            $j('#newSignerEmail').val('');
+                        }
+                        updateSortableBtn();
+                    }
+                    $scope.getDocIconUrl = function(fileName) {
+                        var nameSplit = fileName.split('.');
+                        var type = (nameSplit[nameSplit.length - 1]).toLowerCase();
+                        if (type == 'pdf') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_PDF@2x.png')}";
+                        } else if (type == 'csv') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_CSV@2x.png')}";
+                        } else if (type == 'doc') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_DOC@2x.png')}";
+                        } else if (type == 'docx') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_DOCX@2x.png')}";
+                        } else if (type == 'gif') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_GIF@2x.png')}";
+                        } else if (type == 'jpeg') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_JPEG@2x.png')}";
+                        } else if (type == 'jpg') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_JPG@2x.png')}";
+                        } else if (type == 'png') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_PNG@2x.png')}";
+                        } else if (type == 'ppt') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_PPT@2x.png')}";
+                        } else if (type == 'pptx') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_PPTX@2x.png')}";
+                        } else if (type == 'rtf') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_RTF@2x.png')}";
+                        } else if (type == 'tif') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_TIF@2x.png')}";
+                        } else if (type == 'tiff') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_TIFF@2x.png')}";
+                        } else if (type == 'xls') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_XLS@2x.png')}";
+                        } else if (type == 'xlsx') {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_XLSX@2x.png')}";
+                        } else {
+                            return "{!URLFOR($Resource.m_Resources, 'img/document_TXT@2x.png')}";
+                        }
+                    }
+                });
+
+            function submitDSEnvelope() {
+                var ngScope = $j('#ds_edit').scope();
+
+                if( !validateEnvelope(ngScope) )
+                    return;
+
+                try {
+                    Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.m_EditDocuSignEnvelopeController.editDSEnvelope}',
+                        '{!objId}',
+                        '{!dsEnvId}',
+                        JSON.stringify(ngScope.docs),
+                        JSON.stringify(ngScope.signers), 
+                        function(result, event) {
+                            console.log(result);
+                            if (event.status) {
+                                if( result == '' ) {
+                                    sforce.one.navigateToURL('/apex/dsfs__m_SubmitDocuSignEnvelope?objId={!objId}&dsEnvId={!dsEnvId}&deviceType=' + getDeviceType());
+                                } else {
+                                    showError(result);
+                                }
+                            } else if (event.type === 'exception') {
+                                showError(event.message);
+                            } else {
+                                showError(event.message);
+                            }
+                        }
+                    );
+                } catch (err) {
+                    showError(err.message);
+                }
+            }
+
+        </script>
+
+    </head>
+
+    <body>
+
+        <!-- Mobile Edit DocuSign Envelope Page -->
+        <div data-role="page" id="ds_edit" ng-controller="EditDSEnvCtrl">
+
+            <!-- Hedaer DocuSign Image -->
+            <div data-role="content">
+                <div class="ds-logo-image-container">
+                    <img src="{!URLFOR($Resource.m_Resources, 'img/docusign-logo.png')}"/>
+                </div>
+            </div>
+         
+            <!-- Document Section Header -->
+            <div class="ds-section-header" data-position="inline">
+                <span class="ds-section-title">{!$Label.m_DOCUMENTS}</span>
+                <a href="#" data-role="button" data-mini="true" data-theme="c" data-corners="false" class="ui-btn-right ds-section-btn doc-reorder-btn">{!$Label.m_Reorder}</a>
+                <a href="#" data-role="button" data-mini="true" data-theme="b" data-corners="false" class="ui-btn-right ds-section-btn doc-done-btn">{!$Label.m_Done}</a>
+            </div>
+
+            <!-- Documents list -->
+            <div class="ds-section-content" >
+                <ul data-role="listview" data-inset="true" data-corners="false" id="dsDocsList" >
+                    <li id="{{doc.order}}" ng-repeat="doc in docs | orderBy: order">
+                        <div class="doc-container">
+                            <div class="doc-checkbox-div">
+                                <input type="checkbox" class="ds-doc-checkbox" id="doc-checkbox-{{doc.order}}" docId="{{doc.order}}" />
+                            </div>
+                            <div class="doc-icon-div">
+                                <img ng-src="{{getDocIconUrl(doc.name)}}" alt="" class="ds-doc-icon" />
+                            </div>
+                            <div class="doc-name-div">
+                                {{doc.name|trim}}
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Signer Section Header -->
+            <div class="ds-section-header" data-position="inline">
+                <span class="ds-section-title">{!$Label.m_SIGNERS}</span>
+                <a href="#" data-role="button" data-mini="true" data-theme="c" data-corners="false" class="ui-btn-right ds-section-btn signer-reorder-btn">{!$Label.m_Reorder}</a>
+                <a href="#" data-role="button" data-mini="true" data-theme="b" data-corners="false" class="ui-btn-right ds-section-btn signer-done-btn">{!$Label.m_Done}</a>
+            </div>
+
+            <!-- Signers list -->
+            <div class="ds-section-content">
+                <ul data-role="listview" data-inset="true" data-corners="false" id="dsSignersList">
+                    <li id="{{signer.routingOrder}}" ng-repeat="signer in signers | orderBy: routingOrder" singers-list-directive="singers-list-directive" >
+                        <div class="signer-container">
+                            <div class="signer-info">
+                                <div class="signer-checkbox-div">
+                                    <input type="checkbox" class="ds-signer-checkbox" id="signer-checkbox-{{signer.routingOrder}}" signerId="{{signer.routingOrder}}" />
+                                </div>
+                                <div class="signer-icon-div">
+                                    <img src="{!URLFOR($Resource.m_Resources, 'img/default-signer-icon.png')}" alt="" class="ds-signer-icon" />
+                                </div>
+                                <div class="signer-info-div">
+                                    <div>{{signer.name|trim}}</div>
+                                    <div class="signer-email">{{signer.email|trim}}</div>
+                                </div>
+                            </div>
+                            <div class="dsSignerOptions" id="signerOption-{{signer.routingOrder}}" >
+                                <hr class="signer-options-dashline"/>
+                                <div class="signer-item-container">
+                                    <div class="signer-option-item-1">
+                                        <input class="signer-email-radiobtn" 
+                                                type="radio" 
+                                                name="signer-type-{{signer.routingOrder}}" 
+                                                id="signer-email-radiobtn-{{signer.routingOrder}}" 
+                                                signerId="{{signer.routingOrder}}" 
+                                                value="email" />
+                                    </div>
+                                    <div class="signer-option-item">{!$Label.m_ViaEmail}</div>        
+                                    <div class="signer-option-item signer-inperson signeri-div{{signer.routingOrder}}" >
+                                        <input class="signer-inperson-radiobtn" 
+                                                type="radio" 
+                                                name="signer-type-{{signer.routingOrder}}" 
+                                                id="signer-inperson-radiobtn-{{signer.routingOrder}}" 
+                                                signerId="{{signer.routingOrder}}" 
+                                                value="inperson" />
+                                    </div>
+                                    <div class="signer-option-item signer-inperson signeri-div{{signer.routingOrder}}" >{!$Label.m_InPerson}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Add Signer -->
+            <div class="ds-section-content">
+                <div class="ds-add-signer-container">
+                    <form>
+                        <label for="newSignerName">{!$Label.m_FullName}</label>
+                        <input type="text" id="newSignerName" value="" maxlength="100" placeholder="{!$Label.m_FullNameHere}" ng-model="name" />
+                        <label for="newSignerEmail">{!$Label.m_EmailAddress}</label>
+                        <input type="email" id="newSignerEmail" value="" maxlength="100" placeholder="{!$Label.m_EmailHere}" ng-model="email" />
+                        <div class="error emailError"></div>
+                        <a href="#" data-theme="c" data-role="button" id="dsCancelBtn">{!$Label.m_Cancel}</a>
+                        <a href="#" data-theme="c" data-role="button" id="dsSaveSignerBtn" ng-click="addSigner()">{!$Label.m_SaveSigner}</a>
+                    </form>
+                </div>
+            </div>
+
+            <!-- DocuSign Button -->
+            <div class="ds-section-content">
+                <div class="ds-btn-container">
+                    <a href="#" data-theme="c" data-role="button" id="dsAddSignerBtn">{!$Label.m_AddAnotherSigner}</a>
+                    <a href="javascript:submitDSEnvelope();" data-theme="b" data-role="button" id="dsSubmitBtn">{!$Label.m_DocuSign}</a>
+                </div>
+            </div>         
+
+            <!-- Add Signer Popup for iPhone -->
+            <div data-role="popup" id="addSignerPopup" class="ui-corner-all">
+                <form>
+                    <div class="ds-add-signer-pop-up">
+                        <br/>
+                        <label for="pNewSignerName">{!$Label.m_FullName}</label>
+                        <input type="text" id="pNewSignerName" value="" maxlength="100" placeholder="{!$Label.m_FullNameHere}" ng-model="name" />
+                        <label for="pNewSignerEmail">{!$Label.m_EmailAddress}</label>
+                        <input type="email" id="pNewSignerEmail" value="" maxlength="100" placeholder="{!$Label.m_EmailHere}" ng-model="email" />
+                        <br/>
+                        <a href="#" data-role="button" id="pCancelBtn">{!$Label.m_Cancel}</a>
+                        <a href="#" data-role="button" id="pSaveSignerBtn" ng-click="addSigner()">{!$Label.m_SaveSigner}</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Error Popup -->
+            <div data-role="popup" id="errorDialog" class="ui-corner-all">
+                <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content" id="errorContent">
+                    <div class="ui-title error-message" id="errorMessge">{!$Label.m_Error_InPerson}</div>
+                </div>
+            </div>
+
+        </div>
+
+    </body>
+</html>
+</apex:page>

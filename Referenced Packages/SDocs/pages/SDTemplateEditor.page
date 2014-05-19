@@ -1,0 +1,308 @@
+<apex:page StandardController="SDOC__SDTemplate__c" extensions="SDOC.SDTemplateEditor" >
+<head> 
+
+<apex:styleSheet value="{!URLFOR($Resource.SDOC__SDoc,'skin.css')}" />
+<apex:styleSheet value="{!URLFOR($Resource.SDOC__SDoc,'Sdoc.css')}" />
+<apex:includeScript value="{!URLFOR($Resource.SDOC__ckEditor,'/ckeditor/ckeditor.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.SDOC__SDoc,'yahoo-dom-event.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.SDOC__SDoc,'container-min.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.SDOC__SDoc,'animation-min.js')}" />
+<script type="text/javascript">
+    YAHOO.namespace("force.com");
+    YAHOO.force.com.showMe = function() {
+        document.getElementById("myPanel").style.display = "block";
+        YAHOO.force.com.myDialog.show();
+    }
+    YAHOO.force.com.hideMe = function() {
+        YAHOO.force.com.myDialog.hide();
+    }
+    YAHOO.force.com.showLine = function() {
+        document.getElementById("linePanel").style.display = "block";
+        YAHOO.force.com.eDialog.show();
+    }
+    YAHOO.force.com.hideLine = function() {
+        YAHOO.force.com.eDialog.hide();
+    }
+    
+    YAHOO.force.com.init = function() {
+        document.body.className = document.body.className + " yui-skin-sam";
+        var CKEDITOR   = window.CKEDITOR;
+        if (CKEDITOR.env.ie8){
+           	YAHOO.force.com.myDialog = new YAHOO.widget.Panel(
+            "myPanel",
+            { width           :   "700px",visible         :   false,
+             draggable       :   true, close           :   false,  
+             modal           :   true,  fixedCenter     :   true,  zindex          :   40
+            });
+           	YAHOO.force.com.eDialog = new YAHOO.widget.Panel(
+            "linePanel",
+            { width           :   "700px",visible         :   false,
+             draggable       :   true, close           :   false,  
+             modal           :   true,  fixedCenter     :   true,  zindex          :   41
+            });            
+        }else{
+	        YAHOO.force.com.myDialog = new YAHOO.widget.Panel(
+            "myPanel",  // The id of our dialog container
+            { 
+                    width           :   "700px",    // You can play with this until it's right
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   false,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   40,     // Make sure it's on top of everything
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.60
+                                        } 
+            }
+       		);
+       		YAHOO.force.com.eDialog = new YAHOO.widget.Panel(
+            "linePanel",  // The id of our dialog container
+            { 
+                    width           :   "800px",    // You can play with this until it's right
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   false,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   41,     // Make sure it's on top of everything
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.60
+                                        } 
+            }
+       		);
+       }
+       YAHOO.force.com.myDialog.render(document.body);
+       YAHOO.force.com.eDialog.render(document.body);
+    }
+        YAHOO.util.Event.addListener(window, "load", YAHOO.force.com.init);
+</script>
+</head>
+
+<div id="myPanel" style="display: none">
+	<div class="hd">
+	    <apex:outputtext value="Fields for: {!SDOC__SDTemplate__c.SDOC__Base_Object__c}"/> 
+	</div>
+	<div class="bd">
+    <apex:form >
+    	  <div class="ft" style="font-size: 11px;">
+	    <apex:outputPanel layout="block">
+	      You must select a field first and then the insert button will appear. If you need to extend to even further relationships,
+	      consider creating a formula field on your {!SDOC__SDTemplate__c.SDOC__Base_Object__c} object to make that value accessible for S-Docs.
+	    </apex:outputPanel>
+	  </div>
+        <apex:pageBlock id="block2" >
+            <apex:pageblocksection columns="4">
+                <apex:selectList value="{!f1}" size="12"> 
+                    <apex:selectOptions value="{!f1List}" />
+                    <apex:actionSupport event="onchange" action="{!level1}" rerender="l2,o"></apex:actionSupport>
+                </apex:selectList>
+                <apex:panelGrid id="l2">
+                    <apex:selectList value="{!f2}" size="12" id="f2"  rendered="{!NOT(ISNULL(f2List))}"> 
+                        <apex:selectOptions value="{!f2List}" />
+                        <apex:actionSupport event="onchange" action="{!level2}" rerender="o"></apex:actionSupport>
+                    </apex:selectList>
+                </apex:panelGrid>
+            </apex:pageblocksection>
+            <apex:panelGrid id="o" >
+            		<apex:outputLabel value="Contains Rich Text"/>
+		            <apex:inputcheckbox value="{!checked}" >
+		            <apex:actionSupport event="onchange" action="{!checktoggle}" rerender="o" status="stat"></apex:actionSupport>
+		            </apex:inputcheckbox>
+		          	<apex:actionStatus id="stat">
+		            	<apex:facet name="start">
+                        	<img src="{!URLFOR($Resource.SDoc,'spinner_large.gif')}" />
+                    	</apex:facet>
+                	</apex:actionStatus>
+                    <apex:commandButton value="Insert" oncomplete="insert('{!output}');" rendered="{!NOT(ISNULL(output))}"/>
+                    
+            </apex:panelGrid>
+        </apex:pageBlock>
+        <div style="text-align: right;" >
+            <apex:commandButton value="Cancel" immediate="true" oncomplete="YAHOO.force.com.hideMe();"/>
+        </div>
+    </apex:form>
+	</div>
+
+</div>
+
+
+<div id="linePanel" style="display: none">
+	<div class="hd">
+	    <apex:outputtext value="Insert Related List "/> 
+	</div>
+	<div class="bd">
+    <apex:form >
+   		<div class="ft" style="font-size: 11px;">
+	    <apex:outputPanel layout="block">
+	    Related lists are rendered as tables within your document.
+	    Start by selecting the related list object from the picklist and then specify
+	    which fields you want to include as columns.
+	    Columns are generated from left to right corresponding to their order in your list. 
+	    Once you have completed this step, you can change the column headers names (an styles) using the template editor
+	    as needed. Note that only the table header row will appear to the template editor view, rows will be generated
+	    when the document is created.
+	   
+	    </apex:outputPanel>
+	 	 </div>
+        <apex:pageBlock id="block4" >
+	        <apex:pageblocksection >
+                <apex:outputtext value="Available Related Lists for {!SDOC__SDTemplate__c.SDOC__Base_Object__c} :"/>
+                <apex:selectList value="{!rl1}" size="1"> 
+                    <apex:selectOptions value="{!rl1List}" />
+                    <apex:actionSupport event="onchange" action="{!levelRL1}" rerender="rl2,rl3,p,bt2"></apex:actionSupport>
+                </apex:selectList>
+            </apex:pageblocksection>
+       </apex:pageBlock>
+       <apex:pageBlock id="block5" >
+            <apex:pageblocksection columns="10">
+	            <apex:panelGrid id="rl2">
+	            	<apex:outputtext value="{!rl1Obj}" style="font-weight : bold;"/>
+	            	<apex:outputtext value="Available Fields: "/>
+                    <apex:selectList value="{!rl2}" size="12" id="f4" style="width: 175px;"> 
+                        <apex:selectOptions value="{!rl2List}" />
+                        <apex:actionSupport event="onchange" action="{!levelRL2}" rerender="rl3,p"></apex:actionSupport>
+                    </apex:selectList>
+                </apex:panelGrid>
+              	<apex:panelGrid id="rl3">
+              		<apex:outputtext value="{!rl2Obj}" rendered="{!rl3List.size>0}" style="font-weight : bold;"/>
+              		<apex:outputtext value="Available Fields: " rendered="{!rl3List.size>0}"/>
+                    <apex:selectList value="{!rl3}" size="12" id="f5" rendered="{!rl3List.size>0}" style="width: 175px;"> 
+                        <apex:selectOptions value="{!rl3List}" />
+                    </apex:selectList>
+                </apex:panelGrid>
+				<apex:panelGrid id="bt1"><br></br>
+	                <apex:outputtext value="Add"/><br></br>
+	                <apex:commandButton action="{!add}" image="{!URLFOR($Resource.SDOC__SDoc,'right.gif')}" 
+	                style="border:none; padding:0px 0px 0px 0px;" rerender="p" /><br></br>
+	               	<apex:commandButton action="{!remove}" image="{!URLFOR($Resource.SDOC__SDoc,'left.gif')}" 
+	                style="border:none; padding:0px 0px 0px 0px;" rerender="p" /><br></br>
+	                <apex:outputtext value="Remove"/><br></br>
+				</apex:panelGrid>
+              	<apex:panelGrid id="p">
+              		<apex:outputtext value="Selected Columns" style="font-weight : bold;" /><br></br>
+                    <apex:selectList value="{!rl4}" size="12" id="f6" style="width: 175px;" >  
+                        <apex:selectOptions value="{!rl4List}" />
+                    </apex:selectList>
+                    <apex:commandButton value="Insert Table" oncomplete="insertLine('{!output}');"  rendered="{!rl4List.size>0}" />
+                </apex:panelGrid>
+				<apex:panelGrid id="bt2" rendered="{!rl4List.size>0}">
+	                <apex:outputtext value="Up"/><br></br>
+	                <apex:commandButton action="{!add}" image="{!URLFOR($Resource.SDOC__SDoc,'up.gif')}" 
+	                style="border:none; padding:0px 0px 0px 0px;" rerender="p,q" /><br></br>
+	               	<apex:commandButton action="{!remove}" image="{!URLFOR($Resource.SDOC__SDoc,'down.gif')}" 
+	                style="border:none; padding:0px 0px 0px 0px;" rerender="p,q" /><br></br>
+	                <apex:outputtext value="Down"/><br></br>
+				</apex:panelGrid>                
+           </apex:pageblocksection>
+        </apex:pageBlock>
+        <div style="text-align: right;" >
+            <apex:commandButton value="Cancel" immediate="true" oncomplete="YAHOO.force.com.hideLine();"/>
+        </div>
+    </apex:form>
+	</div>
+
+</div>
+
+
+    <apex:form >
+    <apex:pageMessages />    
+    <apex:pageBlock title="Edit Template: {!SDOC__SDTemplate__c.name}" id="editBlock" mode="edit">
+        <apex:outputText value="Field for edit:" />    
+        <apex:selectList value="{!fieldForEdit}" size="1" id="f3"> 
+            <apex:selectOptions value="{!templateFields}" />
+            <apex:actionSupport event="onchange" action="{!swapEditor}"></apex:actionSupport>
+        </apex:selectList>
+        <apex:pageBlockButtons >
+            <apex:commandButton value="Save" action="{!save}"/>
+            <apex:commandButton value="Quick Save" action="{!quickSave}"/>
+            <apex:commandButton value="Cancel" action="{!cancel}"/>
+            <apex:commandButton value="Insert Field" oncomplete="YAHOO.force.com.showMe();"/>
+            <apex:commandButton value="Insert Related List" oncomplete="YAHOO.force.com.showLine();"/>
+            <apex:commandButton action="{!EditProperties}" value="Set Advanced MS Word Page Properties" rendered="{!SDOC__SDTemplate__c.SDOC__Template_Format__c=='DOC'}"/>
+        </apex:pageBlockButtons>
+        <apex:pageBlockSection columns="1" rendered="{!whichEditor=='1'}">
+                <apex:pageBlockSectionItem >
+                   <apex:inputTextarea id="editor1" value="{!SDOC__SDTemplate__c.SDOC__Template_XML__c}" styleClass="ckeditor" />
+                </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection columns="1" rendered="{!whichEditor=='2'}">
+                <apex:pageBlockSectionItem >
+                   <apex:inputTextarea id="editor2" value="{!SDOC__SDTemplate__c.SDOC__Terms_XML__c}" styleClass="ckeditor" />
+                </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection columns="1" rendered="{!whichEditor=='3'}">
+                <apex:pageBlockSectionItem >
+                   <apex:inputTextarea id="editor3" value="{!SDOC__SDTemplate__c.SDOC__Template_CSS_XML__c}" styleClass="ckeditor" />
+                </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    </apex:form>
+
+
+
+<script type="text/javascript">
+
+insert=function(output){
+    YAHOO.force.com.myDialog.hide();
+    var CKEDITOR   = window.CKEDITOR;
+    for ( var i in CKEDITOR.instances ){
+       var currentInstance = i;
+       break;
+    }
+        var oEditor   = CKEDITOR.instances[currentInstance];
+        oEditor.insertHtml(output);
+};
+
+insertLine=function(output){
+    YAHOO.force.com.eDialog.hide();
+    var CKEDITOR   = window.CKEDITOR;
+    for ( var i in CKEDITOR.instances ){
+       var currentInstance = i;
+       break;
+    }
+        var oEditor   = CKEDITOR.instances[currentInstance];
+        oEditor.insertHtml(output);
+};
+
+window.onload = function(){
+
+var CKEDITOR_BASEPATH = '{!URLFOR($Resource.ckEditor,'ckeditor/')}';
+CKEDITOR.editorConfig = function( config )
+        {
+        config.height = '400';
+        // Define changes to default configuration here. For example:
+        config.language = 'en';
+        config.filebrowserBrowseUrl = '{!$Page.SDFileList}';
+        config.filebrowserUploadUrl = '{!$Page.SDFileUpload}';
+        config.filebrowserImageBrowseUrl = '{!$Page.SDFileList}';
+        config.filebrowserImageUploadUrl = '{!$Page.SDFileUpload}'; 
+        config.fullPage = true;
+        config.toolbar =
+        [
+        ['Source','-','Preview','-','Maximize','-', 'ShowBlocks','-','Templates'],
+        ['Cut','Copy','Paste','PasteText','PasteFromWord','-','Print'],
+        ['Undo','Redo','-','Find','Replace'],
+        ['Image','Table','Link','PageBreak'],
+        '/',
+        ['Styles','Format','Font','FontSize'],
+        ['TextColor','BGColor'],        
+        ['Bold','Italic','Underline','Strike','-',],
+        ['NumberedList','BulletedList','-','Outdent','Indent'],
+        ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock']
+        ];
+        };
+        if (document.getElementsByClassName){
+         var e = document.getElementsByClassName( 'ckeditor' );
+         for(var i=0;i<e.length;i++)
+           {
+                var editor1 = CKEDITOR.replace( e[i]);
+           }
+           }
+
+}
+</script>
+
+</apex:page>

@@ -1,0 +1,169 @@
+<apex:page controller="SDOC.SDCreateController" 
+tabStyle="SDOC__SDTemplate__c" 
+action="{!initStep2}">
+
+<apex:sectionHeader title="Create S-Docs" subtitle="Validate Information"/>
+<apex:form >
+<apex:pageMessages />
+    <span class="style6">&lt;&lt;</span>
+    <apex:commandLink action="{!returnToObj}" value="Back to: record details"/>
+<br></br>
+<br></br>
+<apex:pageBlock title="Validate Information">
+    <apex:commandButton action="{!step1}" value="{!btnTxtStep1}" styleClass="btn"/>
+    &nbsp; &nbsp;   
+    <apex:commandButton action="{!step3}" value="{!btnTxtStep3}" styleClass="btn"/>
+    <br/><br/>
+    <apex:pageBlockSection title="Document Header Information" rendered="false" columns="1" collapsible="false">
+        <apex:outputPanel styleClass="labelPanel" id="bu" layout="block" />
+    </apex:pageBlockSection>
+
+<table width="100%">
+    <tr>
+    <td>
+		<br></br>
+    <apex:pageBlockSection id="recPanel" title="Contact Information" rendered="{!showRecordContact}" columns="1" collapsible="false">
+          <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Contact" for="recContact"/>             
+            <apex:selectList value="{!selectedRecordContact}" size="1" id="recContact">
+                <apex:actionSupport event="onchange" reRender="recPanel" status="recStatus">  
+                </apex:actionSupport>
+                <apex:selectOptions value="{!contactItems}"/>
+                    <apex:actionStatus id="recStatus">
+                        <apex:facet name="start">
+                            <img src="{!URLFOR($Resource.SDoc,'spinner.gif')}" />
+                        </apex:facet>
+                    </apex:actionStatus>
+            </apex:selectList>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Contact Tel No" for="ct"/>
+            <apex:outputText value="{!recordContact.Phone}" id="ct"/> 
+        </apex:pageBlockSectionItem>                    
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Contact Email" for="ce"/>
+            <apex:outputText value="{!shippingContact.Email}" id="ce"/> 
+        </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>
+	</td>
+ 	</tr>
+</table>   
+
+
+<table width="100%">
+    <tr>
+        <td>
+<br></br>
+    <apex:pageBlockSection id="servPanel" title="Shipping Information" rendered="{!showShippingContact}" columns="1" collapsible="false">
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Acct. Name" for="account__name"/>
+            <apex:outputText value="{!acct.name}" id="account__name"/> 
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Ship. Name" for="serv__name"/>
+            <apex:outputText value="{!acct.ShippingStreet}" id="serv__name"/> 
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="City, St Zip" for="csz"/>
+            <apex:outputText value="{!acct.ShippingCity + ','+ acct.ShippingState + ' ' + acct.ShippingPostalCode}" id="csz"/> 
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="County/Parish" for="cp"/>
+            <apex:outputText value="{!acct.ShippingCountry}" id="cp"/> 
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Ship. Contact" for="servContact"/>             
+            <apex:selectList value="{!selectedShippingContact}" size="1" id="servContact">
+                <apex:actionSupport event="onchange" reRender="servPanel" status="servStatus">  
+                </apex:actionSupport>
+                <apex:selectOptions value="{!contactItems}"/>
+                    <apex:actionStatus id="servStatus">
+                        <apex:facet name="start">
+                            <img src="{!URLFOR($Resource.SDoc,'spinner.gif')}" />
+                        </apex:facet>
+                    </apex:actionStatus>
+            </apex:selectList>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Contact Tel No" for="ct"/>
+            <apex:outputText value="{!shippingContact.Phone}" id="ct"/> 
+        </apex:pageBlockSectionItem>                    
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Contact Email" for="ce"/>
+            <apex:outputText value="{!shippingContact.Email}" id="ce"/> 
+        </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>
+</td>
+<td>
+    <apex:pageBlockSection id="billPanel" title="Billing Information" rendered="{!showBillingContact}" columns="1" collapsible="false">
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Acct Name" for="account__name"/>
+            <apex:outputText value="{!acct.name}" id="account__name"/> 
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Bill. Act. Name" for="bill__name"/>
+            <apex:outputText value="{!acct.billingStreet}" id="bill__name"/> 
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="City, St Zip" for="csz"/>
+            <apex:outputText value="{!acct.billingCity + ','+ acct.billingState + ' ' + acct.billingPostalCode}" id="csz"/> 
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="County/Parish" for="cp"/>
+            <apex:outputText value="{!acct.billingCountry}" id="cp"/> 
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Bill. Contact" for="billContact"/>             
+            <apex:selectList value="{!selectedbillingContact}" size="1" id="billContact">
+                <apex:actionSupport event="onchange" reRender="billPanel" status="billStatus">  
+                </apex:actionSupport>
+                <apex:selectOptions value="{!contactItems}"/>
+                    <apex:actionStatus id="billStatus">
+                        <apex:facet name="start">
+                            <img src="{!URLFOR($Resource.SDoc,'spinner.gif')}" />
+                        </apex:facet>
+                    </apex:actionStatus>
+            </apex:selectList>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Contact Tel No" for="ct"/>
+            <apex:outputText value="{!billingContact.Phone}" id="ct"/> 
+        </apex:pageBlockSectionItem>                    
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Contact Email" for="ce"/>
+            <apex:outputText value="{!billingContact.Email}" id="ce"/> 
+        </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>
+    </td>
+    </tr>
+</table>
+<br></br> 
+<apex:panelGroup id="panelNA" rendered="{!NOT(pickContacts)}">
+The document(s) you selected do not require any additional information.<br></br> 
+Click the "Generate Doc" button when you are ready to generate your documents.
+</apex:panelGroup>
+<br></br>
+<br></br>
+<br></br>
+<br></br>
+<br></br> 
+<br></br>
+
+<apex:panelGroup id="panelAI" rendered="{!debugMode}">
+                    <table cellspacing="0" cellpadding="0" class="style1" width="35%">
+                        <tr valign="bottom" align="Left" class="headerRow1">
+                            <td width="100%">Data Merge Details</td>
+                       </tr> 
+                    </table>
+                    <apex:dataTable value="{!fieldsForCapture}" var="f" headerClass="headerRow1" rowClasses="dataRowOdd, dataRowEven" styleClass="style1" width="100%">
+                                <apex:column ><apex:facet name="header"><b>Description</b></apex:facet>
+                                {!f.Descr}</apex:column>
+                                <apex:column ><apex:facet name="header"><b>Value</b></apex:facet>
+                                {!f.Value}</apex:column>
+                     </apex:dataTable>
+</apex:panelGroup>
+<br/><br/>
+</apex:pageBlock>
+</apex:form>
+
+</apex:page>

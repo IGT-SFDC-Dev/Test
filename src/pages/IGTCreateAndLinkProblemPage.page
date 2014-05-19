@@ -1,0 +1,22 @@
+<apex:page controller="IGT_CreateAndLinkProblemController">
+
+<apex:form >
+  <apex:pageblock id="Problem_form" title="Link Problem">
+   <apex:pageBlockButtons >
+                <apex:commandButton action="{!createIncidentLink}" value="Save"/>
+                <apex:commandButton action="{!cancel}" value="Cancel"/>
+   </apex:pageBlockButtons>
+  
+   <apex:pageblocksection columns="2">
+    <apex:inputField value="{!probObj.IGT_Symptom__c}" />
+    <apex:inputField value="{!probObj.IGT_ReferenceSystem__c}" />
+    <apex:inputField value="{!probObj.IGT_ReferenceProduct__c}" />
+    <apex:inputField value="{!probObj.BMCServiceDesk__Work_Around__c}" />
+    <apex:inputField value="{!probObj.BMCServiceDesk__Problem_Description__c}" />
+    <apex:inputField value="{!probObj.BMCServiceDesk__FKUrgency__c}" />
+    <apex:inputField value="{!probObj.BMCServiceDesk__FKImpact__c}" />
+   </apex:pageblocksection>
+  </apex:pageblock>
+</apex:form>
+
+</apex:page>
